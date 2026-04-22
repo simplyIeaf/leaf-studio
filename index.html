@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="menubar">
+  <div class="menu-item" data-menu="file">File
+    <div class="dropdown" id="menu-file">
+      <div class="dd-item" onclick="openSettings()"><span class="checkmark"></span>Settings</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item" onclick="openPublish()"><span class="checkmark"></span>Publish to Roblox</div>
+    </div>
+  </div>
+</div>
+
+<div id="toolbar">
+  <div class="tb-group">
+    <div class="tb-btn" onclick="selectTool('select')" id="tool-select" title="Select (Q)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2l5 12 2.5-4 4 4 1.5-1.5-4-4 4-2.5z"/></svg>
+      <span>Select</span>
+    </div>
+    <div class="tb-btn" onclick="selectTool('move')" id="tool-move" title="Move (W)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l-2 3h1.5v2.5H5v-1.5L2 7l3 1.5V7h2.5v2.5H6l2 3 2-3H8.5V7H11v1.5l3-1.5-3-1.5V7H8.5V4.5H10z"/></svg>
+      <span>Move</span>
+    </div>
+    <div class="tb-btn" onclick="selectTool('scale')" id="tool-scale" title="Scale (E)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span>Scale</span>
+    </div>
+  </div>
+  <div class="tb-group">
+    <div class="tb-btn" onclick="openInsertDialog()" title="Insert Object (Ctrl+I)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+      <span>Insert</span>
+    </div>
+    <div class="tb-btn" onclick="doDelete()" title="Delete (Del)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3h6v1H5zm-1 1h8v1l-.8 8H4.8L4 5zm2.5 2v5h1V6zm2 0v5h1V6z"/></svg>
+      <span>Delete</span>
+    </div>
+    <div class="tb-btn" onclick="groupSelected()" title="Group (Ctrl+G)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="1"/><rect x="4" y="4" width="3" height="3"/><rect x="9" y="4" width="3" height="3"/></svg>
+      <span>Group</span>
+    </div>
+    <div class="tb-btn" onclick="doDuplicate()" title="Duplicate (Ctrl+D)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="8" height="8" rx="1"/><rect x="3" y="3" width="8" height="8" rx="1" fill="#2d2d2d"/></svg>
+      <span>Duplicate</span>
+    </div>
+  </div>
+  <div class="tb-group">
+    <div class="tb-btn" onclick="doUndo()" title="Undo (Ctrl+Z)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7A5 5 0 1 1 5 11"/><polyline points="1,4 4,7 7,4"/></svg>
+      <span>Undo</span>
+    </div>
+    <div class="tb-btn" onclick="doRedo()" title="Redo (Ctrl+Y)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 7A5 5 0 1 0 11 11"/><polyline points="15,4 12,7 9,4"/></svg>
+      <span>Redo</span>
+    </div>
+  </div>
+  <div class="tb-group">
+    <span class="tb-label">Snap:</span>
+    <input id="snap-val" type="number" value="0.125" step="0.125" min="0.0625" max="16" class="snap-input">
+  </div>
+</div>
+
+<div id="app">
+  <div id="main-content">
+    <div id="explorer">
+      <div id="explorer-header">
+        <span class="title">Explorer</span>
+        <input type="text" id="explorer-search" placeholder="Filter..." oninput="filterExplorer(this.value)">
+      </div>
+      <div id="explorer-list"></div>
+    </div>
+
+    <div class="resize-handle" id="resize-main"></div>
+
+    <div id="properties">
+      <div id="properties-header">Properties</div>
+      <div id="properties-list"></div>
+    </div>
+  </div>
+
+  <div id="script-editor">
+    <div id="script-editor-header">
+      <span class="title" id="script-editor-title">Script</span>
+      <button class="btn btn-primary" onclick="saveScript()">Save</button>
+      <button class="btn btn-secondary" onclick="closeScriptEditor()">Close</button>
+    </div>
+    <textarea id="script-editor-area" spellcheck="false" onkeydown="scriptEditorKeydown(event)"></textarea>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div class="modal" id="modal-settings" style="display:none">
+    <div class="modal-title">
+      Settings
+      <button onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section-title">API Credentials</div>
+      <div class="form-group">
+        <label>API Key</label>
+        <input type="password" id="s-apikey" placeholder="Enter API key">
+      </div>
+      <div class="form-section-title">User Account</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>User ID</label>
+          <input type="number" id="s-userid" placeholder="User ID">
+        </div>
+        <div class="form-group">
+          <label>Universe ID <span class="text-dim">(optional)</span></label>
+          <input type="number" id="s-univid" placeholder="Universe ID">
+        </div>
+      </div>
+      <div class="form-section-title">Group Account</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Group ID</label>
+          <input type="number" id="s-groupid" placeholder="Group ID">
+        </div>
+        <div class="form-group">
+          <label>Group Universe ID <span class="text-dim">(optional)</span></label>
+          <input type="number" id="s-groupunivid" placeholder="Group Universe ID">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-publish" style="display:none">
+    <div class="modal-title">
+      Publish to Roblox
+      <button onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section-title">Publish Target</div>
+      <div class="publish-target-group">
+        <div class="publish-target-opt selected" id="pub-target-user" onclick="selectPubTarget('user')">
+          <div class="pt-label">User Account</div>
+        </div>
+        <div class="publish-target-opt" id="pub-target-group" onclick="selectPubTarget('group')">
+          <div class="pt-label">Group</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Model Name</label>
+        <input type="text" id="pub-name" value="Model">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pub-desc"></textarea>
+      </div>
+      <div id="pub-result-area">
+        <div id="pub-status" style="display:none;padding:8px;background:var(--bg-item);border-radius:4px;font-size:12px;color:var(--text-dim);margin-bottom:8px;"></div>
+        <div id="publish-result" style="display:none;padding:12px;background:var(--bg-item);border:1px solid #23a559;border-radius:4px;margin-top:10px;">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Published successfully</div>
+          <div class="res-link" id="pub-link" onclick="window.open(this.dataset.url,'_blank')" style="color:var(--accent);font-size:12px;cursor:pointer;word-break:break-all;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="pub-btn" onclick="doPublish()">Publish</button>
+    </div>
+  </div>
+
+  <div class="modal" id="insert-dialog" style="display:none;max-width:680px">
+    <div class="modal-title">
+      Insert Object
+      <button onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="ins-filter">
+        <input type="text" id="ins-search" placeholder="Search objects..." oninput="filterInsertDialog(this.value)">
+      </div>
+      <div class="ins-category-tabs" id="ins-cats"></div>
+      <div class="obj-grid" id="ins-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="ctx-menu">
+  <div class="ctx-item" onclick="ctxInsert()">Insert Object</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxCut()">Cut</div>
+  <div class="ctx-item" onclick="ctxCopy()">Copy</div>
+  <div class="ctx-item" onclick="ctxPaste()">Paste Into</div>
+  <div class="ctx-item" onclick="doDuplicate()">Duplicate</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="renameSelected()">Rename</div>
+  <div class="ctx-item" onclick="openScriptEditor()">Open Script Editor</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="groupSelected()">Group Objects</div>
+  <div class="ctx-item" onclick="ungroupSelected()">Ungroup</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="doDelete()">Delete</div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
