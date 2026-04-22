@@ -1120,7 +1120,7 @@ async function doPublish() {
   statusEl.textContent = 'Uploading to Roblox servers...';
 
   try {
-    var res = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/assets', {
+    var res = await fetch('https://blue-thunder-b2a2.itzsimplyleaf345.workers.dev/assets/v1/assets', {
       method: 'POST',
       headers: { 'x-api-key': s.apiKey },
       body: fd,
@@ -1156,7 +1156,7 @@ async function pollOperation(opPath, apiKey, statusEl) {
   var start = Date.now();
   while (Date.now()-start < 180000) {
     await new Promise(r => setTimeout(r, 4000));
-    var r = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/' + opPath, {
+    var r = await fetch('https://blue-thunder-b2a2.itzsimplyleaf345.workers.dev/assets/v1/' + opPath, {
       headers: { 'x-api-key': apiKey }
     });
     var d = await r.json();
