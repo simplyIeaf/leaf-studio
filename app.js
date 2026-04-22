@@ -1156,7 +1156,6 @@ async function pollOperation(opPath, apiKey, statusEl) {
   while (Date.now()-start < 180000) {
     await new Promise(r => setTimeout(r, 4000));
     var r = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/' + opPath + '?_apikey=' + encodeURIComponent(apiKey));
-    });
     var d = await r.json();
     if (d.done) return d;
     statusEl.textContent = 'Finalizing...';
