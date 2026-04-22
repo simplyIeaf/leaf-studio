@@ -1114,7 +1114,7 @@ async function doPublish() {
     creationContext: { creator: creator },
   };
   var fd = new FormData();
-  fd.append('request', new Blob([JSON.stringify(payload)], { type:'application/json' }));
+  fd.append('request', JSON.stringify(payload));
   fd.append('fileContent', blob, 'model.rbxmx');
 
   statusEl.textContent = 'Uploading to Roblox servers...';
