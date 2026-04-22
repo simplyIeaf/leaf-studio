@@ -1120,10 +1120,11 @@ async function doPublish() {
   statusEl.textContent = 'Uploading to Roblox servers...';
 
   try {
-    var res = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/assets?_apikey=' + encodeURIComponent(s.apiKey), {
-  method: 'POST',
-  body: fd,
-  });
+    var res = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/assets', {
+      method: 'POST',
+      headers: { 'x-api-key': s.apiKey },
+      body: fd,
+    });
     var data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || data.errors?.[0]?.message || JSON.stringify(data));
@@ -1155,7 +1156,9 @@ async function pollOperation(opPath, apiKey, statusEl) {
   var start = Date.now();
   while (Date.now()-start < 180000) {
     await new Promise(r => setTimeout(r, 4000));
-    var r = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/' + opPath + '?_apikey=' + encodeURIComponent(apiKey));
+    var r = await fetch('https://simplyieaf--ab7e1f3e3e6a11f1b2fa42b51c65c3df.web.val.run/assets/v1/' + opPath, {
+      headers: { 'x-api-key': apiKey }
+    });
     var d = await r.json();
     if (d.done) return d;
     statusEl.textContent = 'Finalizing...';
@@ -1239,7 +1242,7 @@ function initResizeHandle() {
     dragging = true;
     startPos = window.innerHeight > window.innerWidth ? e.clientY : e.clientX;
     startSize = window.innerHeight > window.innerWidth ? explorer.offsetHeight : explorer.offsetWidth;
-    handle.classList.add('dragging'); 
+    handle.classList.add('dragging');
     e.preventDefault();
   });
 
@@ -1248,7 +1251,7 @@ function initResizeHandle() {
     var isPortrait = window.innerHeight > window.innerWidth;
     var currentPos = isPortrait ? e.clientY : e.clientX;
     var delta = currentPos - startPos;
-    
+
     if (isPortrait) {
       explorer.style.flex = 'none';
       explorer.style.width = '100%';
